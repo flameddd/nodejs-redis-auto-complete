@@ -1,6 +1,8 @@
 ## inspire by Salvatore Sanfilippo aka antirez
 - [Auto Complete with Redis](http://oldblog.antirez.com/post/autocomplete-with-redis.html)
 
+### tags
+ - `nodejs`, `redis`, `auto complete`
 
 ## prerequire
 ### redis
