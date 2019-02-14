@@ -8,7 +8,6 @@
 ### redis
 > docker run -d -p 6379:6379 --name autoCompleteRedis redis:latest
 
-
 ## env
 ```
   host: process.env.REDIS_HOST || 'localhost',
@@ -21,6 +20,9 @@
 
 ## start
 > npm start
+
+### dataset
+> ./female-names.txt
 
 ### screen shot
 ![image info](./result.png)
