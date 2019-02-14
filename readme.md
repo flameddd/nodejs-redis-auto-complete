@@ -1,3 +1,7 @@
+## inspire by Salvatore Sanfilippo aka antirez
+- [Auto Complete with Redis](http://oldblog.antirez.com/post/autocomplete-with-redis.html)
+
+
 ## prerequire
 ### redis
 > docker run -d -p 6379:6379 --name autoCompleteRedis redis:latest
@@ -15,3 +19,6 @@
 
 ## start
 > npm start
+
+### screen shot
+![image info](./result.png)

@@ -6,11 +6,6 @@ const promisify = require('util').promisify;
 const DEFAULT_REDIS_SET_NAME = 'myzset';
 const isKeywork = new RegExp(/\*$/);
 
-const rl = readline.createInterface({
-  input: fs.createReadStream('./female-names.txt'),
-  crlfDelay: Infinity
-});
-
 const client = redis.createClient({
   host: process.env.REDIS_HOST || 'localhost',
   port: process.env.REDIS_PORT || '6379',
@@ -19,25 +14,27 @@ const client = redis.createClient({
 
 const zrankAsync = promisify(client.zrank).bind(client);
 const zrangeAsync = promisify(client.zrange).bind(client);
+const zaddAsync = promisify(client.zadd).bind(client);
 
-let keyword_list = [DEFAULT_REDIS_SET_NAME];
-rl.on('line', (line) => {
-  for (let index = 1; index <= line.length; index++) {
-    keyword_list.push(0)
-    keyword_list.push(line.substring(0, index))
-  }
-  keyword_list.push(0)
-  keyword_list.push(`${line}*`)
-})
-  .on('close', function () {
-    client.zadd(keyword_list, function (err, response) {
-      if (err) {
-        console.log(err)
-        throw err;
-      }
-      console.log('init redis data sets, added ' + response + ' items.');
+function readDataFlow() {
+  return new Promise(resolve => {
+    const rl = readline.createInterface({
+      input: fs.createReadStream('./female-names.txt'),
+      crlfDelay: Infinity
     });
-  });
+    let keyword_list = [DEFAULT_REDIS_SET_NAME];
+
+    rl.on('line', (line) => {
+      for (let index = 1; index <= line.length; index++) {
+        keyword_list.push(0)
+        keyword_list.push(line.substring(0, index))
+      }
+      keyword_list.push(0)
+      keyword_list.push(`${line}*`)
+    })
+      .on('close', () => resolve(keyword_list));
+  })
+}
 
 let results = []
 const rangelen = 50 // This is not random, try to get replies < MTU size
@@ -69,4 +66,13 @@ async function getKeyword({ prefixKeyword, count }) {
   }
 }
 
-getKeyword({ prefixKeyword: 'vall', count: 50 })
+async function mainFlow() {
+  const keyword_list = await readDataFlow();
+  const insertedData = await zaddAsync(keyword_list)
+  console.log('init redis data sets, added ' + insertedData + ' items.');
+  await getKeyword({ prefixKeyword: 'b', count: 50 })
+  client.quit();
+  process.exit(0);
+}
+
+mainFlow();
